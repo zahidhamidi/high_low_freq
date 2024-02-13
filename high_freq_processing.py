@@ -508,7 +508,14 @@ with col4:
     
     # Create an interactive heatmap using Plotly Express
     fig = px.imshow(correlation_matrix, labels=dict(color="Correlation Score"), x=correlation_matrix.columns, y=correlation_matrix.columns,color_continuous_scale='Reds')
-    fig.update_layout(title='Correlation Heat Map')
+    fig.update_layout(title='Correlation Heat Map',
+                          height =  700)
+    
+    # Add correlation scores to the scatter matrix
+    for i, col in enumerate(['WOB', 'OBROP', 'RPM', 'FlowRate']):
+        for j, row in enumerate(['WOB', 'OBROP', 'RPM', 'FlowRate']):
+            fig.add_trace(go.Scatter(x=[col], y=[row], text=[f'{correlation_matrix.iloc[i, j]:.2f}'],
+                                    mode='text', showlegend=False))
 
     # Display the interactive heatmap using Streamlit
     st.plotly_chart(fig,use_container_width=True)
@@ -518,7 +525,8 @@ with col5:
 
         # Assuming filtered_df contains your data
         fig = px.scatter_matrix(filtered_df[['WOB', 'OBROP', 'RPM', 'FlowRate']])
-        fig.update_layout(title='Correlation Pair Plot')
+        fig.update_layout(title='Correlation Pair Plot',
+                          height =  800)
 
         # Display the pair plot in Streamlit
         st.plotly_chart(fig,use_container_width=True)
