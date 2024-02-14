@@ -347,8 +347,8 @@ if upload_file:
                     fig, ax = plt.subplots(figsize=(1, 1.5))
                     scatter = ax.scatter(filtered_df['Lower Depth'],filtered_df[column], c=filtered_df[column], cmap='viridis')
 
-                    # Invert the y-axis
-                    ax.invert_yaxis()
+                # Invert the y-axis
+                ax.invert_yaxis()
 
                     ax.set_title(f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
 
@@ -637,22 +637,22 @@ if upload_file:
             st.plotly_chart(fig,use_container_width=True)
 
 
-        with col5: 
-                
-                fig = go.Figure(data=go.Splom(
-                        dimensions=[dict(label='WOB',
-                                        values=filtered_df['WOB']),
-                                    dict(label='OBROP',
-                                        values=filtered_df['OBROP']),
-                                    dict(label='RPM',
-                                        values=filtered_df['RPM']),
-                                    dict(label='FlowRate',
-                                        values=filtered_df['FlowRate'])],
-                                        showupperhalf=False, # remove plots on diagonal
-                        marker=dict(
-                                    line_color='white', line_width=0.5)
-                        ))
-                fig.update_layout(title=f'Correlation Pair Plot for Hole Size {selected_hole_size}',height=700)
+    with col5: 
+            
+            fig = go.Figure(data=go.Splom(
+                    dimensions=[dict(label='WOB',
+                                    values=filtered_df['WOB']),
+                                dict(label='OBROP',
+                                    values=filtered_df['OBROP']),
+                                dict(label='RPM',
+                                    values=filtered_df['RPM']),
+                                dict(label='FlowRate',
+                                    values=filtered_df['FlowRate'])],
+                                    showupperhalf=False, # remove plots on diagonal
+                    marker=dict(
+                                line_color='white', line_width=0.5)
+                    ))
+            fig.update_layout(title=f'Correlation Pair Plot for Hole Size {selected_hole_size}',height=700)
 
 
 
