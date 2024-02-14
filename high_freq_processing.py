@@ -121,16 +121,8 @@ if upload_file:
     st.subheader("Run Summary Info Declaration",divider=True)
 
     # Creating input tables for depth, diameter, and run number declaration
-    # Function to initialize session state and load data if needed
-    def init_session_state():
-        if "mdf" not in st.session_state:
-            st.session_state.mdf = pd.DataFrame()
-    
-    # Initialize session state and load data
-    init_session_state()
-    
-    # Access the data using session state directly
-    mdf = st.session_state.mdf
+    if "mdf" not in st.session_state:
+        st.session_state.mdf = pd.DataFrame()
 
     col1, col2, col3, col4 = st.columns(4)
     startdepth = col1.text_input('Start Depth')
