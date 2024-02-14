@@ -121,8 +121,17 @@ if upload_file:
     st.subheader("Run Summary Info Declaration",divider=True)
 
     # Creating input tables for depth, diameter, and run number declaration
-    if "mdf" not in st.session_state:
-        st.session_state.mdf = pd.DataFrame()
+    # Using st.cache to cache the function results
+    @st.cache
+    def load_data():
+        # Loading or initializing data, if needed
+        if "mdf" not in st.session_state:
+            st.session_state.mdf = pd.DataFrame()
+    
+        return st.session_state.mdf
+    
+    # Accessing the data using the cached function
+    mdf = load_data()
 
     col1, col2, col3, col4 = st.columns(4)
     startdepth = col1.text_input('Start Depth')
@@ -318,7 +327,7 @@ if upload_file:
         result_df = result_df.dropna(subset=['OBROP'])
 
 
-        df_bin.to_csv(r"C:\Users\ZHamid2\OneDrive - SLB\Downloads\high_freq_bin.csv", index=False)
+        df_bin.to_csv(r"high_freq_bin.csv", index=False)
 
 
 
