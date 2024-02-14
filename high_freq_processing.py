@@ -25,7 +25,7 @@ st.divider()
 
 if upload_file:
     # Read the CSV file into a Pandas DataFrame
-    df = pd.read_csv(csv_file_path)
+    df = pd.read_csv(upload_file)
     first_original_rows = len(df)
         
         
