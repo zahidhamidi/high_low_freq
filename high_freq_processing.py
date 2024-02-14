@@ -572,7 +572,7 @@ with col4:
     
     # Create an interactive heatmap using Plotly Express
     fig = px.imshow(correlation_matrix, labels=dict(color="Correlation Score"), x=correlation_matrix.columns, y=correlation_matrix.columns,color_continuous_scale='Reds')
-    fig.update_layout(title='Correlation Heat Map',
+    fig.update_layout(title=f'Correlation Heat Map for Hole Size {selected_hole_size}',
                           height =  700)
     
     # Add correlation scores to the scatter matrix
@@ -600,7 +600,7 @@ with col5:
                 marker=dict(
                             line_color='white', line_width=0.5)
                 ))
-        fig.update_layout(height=700)
+        fig.update_layout(title=f'Correlation Pair Plot for Hole Size {selected_hole_size}',height=700)
 
 
 
