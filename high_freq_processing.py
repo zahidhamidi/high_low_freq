@@ -6,6 +6,8 @@ import plotly.express as px
 from sklearn.preprocessing import MinMaxScaler
 import plotly.graph_objects as go
 import seaborn as sns
+import statsmodels.api as sm
+
 
 # Use the full page instead of a narrow central column
 st.set_page_config(layout="wide")
@@ -15,6 +17,7 @@ csv_file_path = r"C:\Users\ZHamid2\OneDrive - SLB\Downloads\Parameters_ 15H.csv"
 
 st.title("Drilling Parameter High-Frequency Sensor Data Streamlined Processing")
 st.write("Automated Workflow for High-frequency to Low-frequency transformation of Sensor Data")
+
 st.divider()
 
 upload_file = st.file_uploader("Upload your file here")
@@ -139,9 +142,6 @@ condition = (df.get('Rotary RPM', 0) > 500) & \
 
 df = df[~condition]
 
-
-
-
 # Filter the DataFrame : Hole depth > 30
 start_hole_depth = 30
 df = df[df['Hole Depth'] > start_hole_depth]
@@ -186,10 +186,6 @@ for index, row in df.iterrows():
         df.at[index, 'Run Number'] = 7
 
 
-
-
-
-
 # Move the 'Drilling Progression' column to index 1
 df.insert(1, 'Drilling Progression', df.pop('Drilling Progression'))
 
@@ -217,12 +213,8 @@ with st.sidebar:
     selected_bin = st.slider("Select Bin Size (Depth in meters interval)", min_value=10, max_value=200,step=10)
     
 
-
-
-
 # Create an empty DataFrame to store the results
 result_df = pd.DataFrame(columns=['WellGUID','WellName','RunId','RunNumber','Hole Size','Depth Interval','TVD', 'FlowRate','OBROP','RPM','WOB','Mud Density','MudType'])
-
 
 
 for size in hole_size:
@@ -247,15 +239,8 @@ for size in hole_size:
         else:
             # Treat the whole depth range as a single interval
             df.loc[run_index, 'Depth Interval'] = f'[{df.loc[run_index, "Hole Depth"].min()}, {df.loc[run_index, "Hole Depth"].max()})'
-            
-    
+                
     df_bin = df
-
-
-    # # Use this is range is > bin size
-    # df.loc[section_index, 'Depth Interval'] = pd.cut(df.loc[section_index, 'Hole Depth'], bins=range(0, len(df), selected_bin), right=False)
-
-    # df_bin = df
 
     
     # Calculate average values for each bin interval
@@ -290,10 +275,8 @@ result_df = result_df.dropna(subset=['OBROP'])
 df_bin.to_csv(r"C:\Users\ZHamid2\OneDrive - SLB\Downloads\high_freq_bin.csv", index=False)
 
 
-print(result_df)
 
 col1, col2, col3, col4 = st.columns(4)
-
 
 
 # Filter data based on selected hole size
@@ -308,12 +291,49 @@ lower = filtered_df['Lower Depth']
 # Iterate through each column and create individual plots
 for column in result_df.columns:
     if (column != 'Depth Interval') and (column != 'Hole Size'):
-        def plot(column):
-            # Preprocess 'Depth Interval' column to extract lower limit
-            # filtered_df['Upper Depth'] = filtered_df['Depth Interval'].str.split('[,)]').str[1].astype(float)
-            # filtered_df['Lower Depth'] = filtered_df['Depth Interval'].str.split(r'\[|,|\)').str[1].astype(float)
-            
+
+        def plot_trend(column,option1):
+
+            # Calculate Lowess trendline
+            lowess = sm.nonparametric.lowess(filtered_df[column], filtered_df['Lower Depth'], frac=0.3)
+
             # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
+            fig, ax = plt.subplots(figsize=(1, 1.5))
+            scatter = ax.scatter(filtered_df['Lower Depth'],filtered_df[column], c=filtered_df[column], cmap='viridis')
+
+            # Invert the y-axis
+            ax.invert_yaxis()
+
+            ax.set_title(f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
+
+
+            if column == "OBROP":
+                column = "OBROP (m/hr)"
+            elif column == "WOB":
+                column = "WOB (klbf)"
+            elif column == "RPM":
+                column = "RPM (c/min)"
+            elif column == "FlowRate":
+                column = "Flowrate (gpm)"
+            if option1:
+                ax.plot(lowess[:, 0], lowess[:, 1], color='red',linewidth=4.0)
+                ax.set_ylabel(column)
+
+                if column == "Flowrate (gpm)":
+                    ax.set_xlabel('Depth Interval (m)')
+                ax.grid(True)
+
+            else:
+                ax.set_ylabel(column)
+
+                if column == "Flowrate (gpm)":
+                    ax.set_xlabel('Depth Interval (m)')
+                ax.grid(True)
+            st.plotly_chart(fig,use_container_width=True, theme='streamlit')
+
+        def plot(column):
+            
+            """# Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
             fig, ax = plt.subplots(figsize=(5, 6))
             scatter = ax.scatter(filtered_df[column], filtered_df['Lower Depth'], c=filtered_df[column], cmap='viridis')
 
@@ -334,7 +354,36 @@ for column in result_df.columns:
 
             ax.set_xlabel(column)
             ax.set_ylabel('Depth Interval (m)')
-            ax.grid(True)
+            ax.grid(True)"""
+
+            # Create a scatter plot
+            x_data = filtered_df[column]
+            y_data = filtered_df['Lower Depth']
+            
+            fig = px.scatter(filtered_df, x=x_data, y=y_data, color=x_data, color_continuous_scale='viridis')
+
+            # Invert the y-axis
+            fig.update_layout(yaxis=dict(autorange="reversed"))
+
+            # Set title and axis labels
+            fig.update_layout(title=f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
+            fig.update_layout(xaxis_title=column)
+            fig.update_layout(yaxis_title='Depth Interval (m)')
+
+            # Update axis labels based on your conditions
+            if column == "OBROP":
+                fig.update_layout(xaxis_title="OBROP (m/hr)")
+            elif column == "WOB":
+                fig.update_layout(xaxis_title="WOB (klbf)")
+            elif column == "RPM":
+                fig.update_layout(xaxis_title="RPM (c/min)")
+            elif column == "FlowRate":
+                fig.update_layout(xaxis_title="Flowrate (gpm)")
+
+            # Show grid
+            fig.update_layout(height=800)
+            
+
 
 
             # Display the plot in the Streamlit app
@@ -358,6 +407,8 @@ for column in result_df.columns:
                 ax.scatter(normalized_params[:, 1], filtered_df['Lower Depth'], label='OBROP (m/hr)', cmap='viridis', alpha=0.8)
                 ax.scatter(normalized_params[:, 2], filtered_df['Lower Depth'], label='RPM', cmap='viridis', alpha=0.8)
                 ax.scatter(normalized_params[:, 3], filtered_df['Lower Depth'], label='WOB (klbf)', cmap='viridis', alpha=0.8)
+
+                
             
             elif checkbox == "OBROP vs. RPM":
 
@@ -369,7 +420,24 @@ for column in result_df.columns:
                 ax.scatter(normalized_params[:, 1], filtered_df['Lower Depth'], label='OBROP (m/hr)', cmap='viridis', alpha=0.8)
                 ax.scatter(normalized_params[:, 3], filtered_df['Lower Depth'], label='WOB (klbf)', cmap='viridis', alpha=0.8)
 
-            elif checkbox == "Cross Plot":
+            elif checkbox == "OBROP vs. FlowRate":
+
+                ax.scatter(normalized_params[:, 1], filtered_df['Lower Depth'], label='OBROP (m/hr)', cmap='viridis', alpha=0.8)
+                ax.scatter(normalized_params[:, 0], filtered_df['Lower Depth'], label='FlowRate (gpm)', cmap='viridis', alpha=0.8)
+            
+            elif checkbox == "RPM vs. FlowRate":
+
+                ax.scatter(normalized_params[:, 2], filtered_df['Lower Depth'], label='RPM', cmap='viridis', alpha=0.8)
+                ax.scatter(normalized_params[:, 0], filtered_df['Lower Depth'], label='FlowRate (gpm)', cmap='viridis', alpha=0.8)
+        
+            
+            elif checkbox == "FlowRate vs. WOB":
+
+                ax.scatter(normalized_params[:, 0], filtered_df['Lower Depth'], label='FlowRate (gpm)', cmap='viridis', alpha=0.8)
+                ax.scatter(normalized_params[:, 3], filtered_df['Lower Depth'], label='WOB (klbf)', cmap='viridis', alpha=0.8)
+
+            
+            elif checkbox == "Cross Plot RPM vs. WOB":
                 # Define minimum and maximum bubble sizes
                 min_size = 10
                 max_size = 500
@@ -409,12 +477,6 @@ for column in result_df.columns:
                 )
 
 
-
-                # Display the Plotly chart in the Streamlit app
-                # st.plotly_chart(fig, use_container_width=True)
-                
-      
-
             else:
                 pass
 
@@ -447,18 +509,29 @@ for column in result_df.columns:
             with col4:
                 # st.subheader("OBROP")
                 plot(column)
+    
+st.divider()
+st.subheader("Operation Parameter Trendline",divider=True)
+
+option1 = st.checkbox("Trend Line")
+columns = ['OBROP', 'WOB', 'RPM', 'FlowRate']
+for column in columns:
+    plot_trend(column,option1)
+
+
+
+
+
 
 st.divider()
 
 st.subheader("Operation Parameter CrossPlots",divider=True)
-checkbox = st.selectbox("Select Plots",("All Parameter Plot","OBROP vs. RPM","OBROP vs. WOB", "Cross Plot"))  
+checkbox = st.selectbox("Select Plots",("All Parameter Plot","OBROP vs. RPM","OBROP vs. WOB","OBROP vs. FlowRate","RPM vs. FlowRate","FlowRate vs. WOB","Cross Plot RPM vs. WOB"))  
 
 col1, col2= st.columns(2)
 
 with col1:
     plot_all(checkbox)
-    
-
 
         
 filtered_df['Lower Depth'] = lower
@@ -483,15 +556,6 @@ with col2:
     st.write(f"Original Data Point Rows Count (Post-cleaning) : {original_rows}")
     st.write(f"Data Points has been trimmed up to : {((first_original_rows - len(filtered_df))/first_original_rows)*100:.2f} %")
 
-
-
-    # if download:
-
-    #     # Specify the path for the output CSV file
-    #     output_csv_path = r"C:\Users\ZHamid2\OneDrive - SLB\Downloads\high_freq_output.csv"
-
-    #     # Write the DataFrame to a new CSV file
-    #     edited_df.to_csv(output_csv_path, index=False)
 
 
 # Assuming 'Lower Depth' column contains Interval objects or NaN values
@@ -522,11 +586,24 @@ with col4:
 
 
 with col5: 
+        
+        fig = go.Figure(data=go.Splom(
+                dimensions=[dict(label='WOB',
+                                 values=filtered_df['WOB']),
+                            dict(label='OBROP',
+                                 values=filtered_df['OBROP']),
+                            dict(label='RPM',
+                                 values=filtered_df['RPM']),
+                            dict(label='FlowRate',
+                                 values=filtered_df['FlowRate'])],
+                                 showupperhalf=False, # remove plots on diagonal
+                marker=dict(
+                            line_color='white', line_width=0.5)
+                ))
+        fig.update_layout(height=700)
 
-        # Assuming filtered_df contains your data
-        fig = px.scatter_matrix(filtered_df[['WOB', 'OBROP', 'RPM', 'FlowRate']])
-        fig.update_layout(title='Correlation Pair Plot',
-                          height =  800)
+
+
 
         # Display the pair plot in Streamlit
         st.plotly_chart(fig,use_container_width=True)
