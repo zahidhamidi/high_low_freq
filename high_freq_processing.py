@@ -120,50 +120,20 @@ if upload_file:
 
     st.subheader("Run Summary Info Declaration",divider=True)
 
-    # Creating input tables for depth, diameter, and run number declaration
-    if "mdf" not in st.session_state:
-        st.session_state.mdf = pd.DataFrame()
 
-    col1, col2, col3, col4 = st.columns(4)
-    startdepth = col1.text_input('Start Depth')
-    enddepth = col2.text_input('End Depth')
-    holediameter = col3.text_input('Hole Diameter')
-    run_input = col4.text_input('Run Number')
+    df_test = pd.DataFrame(columns=["Start Depth","End Depth", "Hole Diameter", "Run Number"])
+    df_entry = st.data_editor(df_test,num_rows="dynamic",key="data_editor")
 
-    submit_button = st.button('Submit Entry')
-
-    if submit_button:
-
-
-        df_entry = pd.DataFrame({
-            'Start Depth': [startdepth],
-            'End Depth': [enddepth],
-            'Hole Diameter': [holediameter],
-            'Run Number': [run_input]
-        })
-
-        
-
-        st.session_state.mdf = pd.concat([st.session_state.mdf, df_entry], axis=0)
-
+    if 'clicked' not in st.session_state:
+        st.session_state.clicked = False
     
+    def click_button():
+        st.session_state.clicked = True
 
-    st.dataframe(st.session_state.mdf)
-    df_entry = st.session_state.mdf
+    st.button("Confirm Entry",on_click=click_button)
+
+    if st.session_state.clicked:
     
-
-    st.write(f"Total Entry: {st.session_state.mdf.shape[0]}")
-
-    confirm_button = st.button('Confirm Entry')
-
-
-    
-
-    
-
-    if confirm_button:
-
-        
 
         st.divider()
 
@@ -205,7 +175,7 @@ if upload_file:
 
         start = df_entry['Start Depth'].astype(int).tolist()
         end = df_entry['End Depth'].astype(int).tolist()
-        hole_size = df_entry['Hole Diameter'].astype(int).tolist()
+        hole_size = df_entry['Hole Diameter'].astype(float).tolist()
 
 
         # Loop through each row
@@ -318,7 +288,7 @@ if upload_file:
         result_df = result_df.dropna(subset=['OBROP'])
 
 
-        df_bin.to_csv(r"C:\Users\ZHamid2\OneDrive - SLB\Downloads\high_freq_bin.csv", index=False)
+        df_bin.to_csv(r"high_freq_bin.csv", index=False)
 
 
 
@@ -347,8 +317,8 @@ if upload_file:
                     fig, ax = plt.subplots(figsize=(1, 1.5))
                     scatter = ax.scatter(filtered_df['Lower Depth'],filtered_df[column], c=filtered_df[column], cmap='viridis')
 
-                # Invert the y-axis
-                ax.invert_yaxis()
+                    # Invert the y-axis
+                    ax.invert_yaxis()
 
                     ax.set_title(f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
 
@@ -637,22 +607,22 @@ if upload_file:
             st.plotly_chart(fig,use_container_width=True)
 
 
-    with col5: 
-            
-            fig = go.Figure(data=go.Splom(
-                    dimensions=[dict(label='WOB',
-                                    values=filtered_df['WOB']),
-                                dict(label='OBROP',
-                                    values=filtered_df['OBROP']),
-                                dict(label='RPM',
-                                    values=filtered_df['RPM']),
-                                dict(label='FlowRate',
-                                    values=filtered_df['FlowRate'])],
-                                    showupperhalf=False, # remove plots on diagonal
-                    marker=dict(
-                                line_color='white', line_width=0.5)
-                    ))
-            fig.update_layout(title=f'Correlation Pair Plot for Hole Size {selected_hole_size}',height=700)
+        with col5: 
+                
+                fig = go.Figure(data=go.Splom(
+                        dimensions=[dict(label='WOB',
+                                        values=filtered_df['WOB']),
+                                    dict(label='OBROP',
+                                        values=filtered_df['OBROP']),
+                                    dict(label='RPM',
+                                        values=filtered_df['RPM']),
+                                    dict(label='FlowRate',
+                                        values=filtered_df['FlowRate'])],
+                                        showupperhalf=False, # remove plots on diagonal
+                        marker=dict(
+                                    line_color='white', line_width=0.5)
+                        ))
+                fig.update_layout(title=f'Correlation Pair Plot for Hole Size {selected_hole_size}',height=700)
 
 
 
