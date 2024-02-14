@@ -603,7 +603,7 @@ if upload_file:
                                     values=filtered_df['RPM']),
                                 dict(label='FlowRate',
                                     values=filtered_df['FlowRate'])],
-                                    showupperhalf=False, # remove plots on diagonal
+                                    
                     marker=dict(
                                 line_color='white', line_width=0.5)
                     ))
