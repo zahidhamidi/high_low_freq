@@ -303,7 +303,7 @@ if upload_file:
                 scatter = ax.scatter(filtered_df['Lower Depth'],filtered_df[column], c=filtered_df[column], cmap='viridis')
 
                 # Invert the y-axis
-                ax.invert_yaxis()
+                # ax.invert_yaxis()
 
                 ax.set_title(f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
 
