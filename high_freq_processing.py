@@ -205,7 +205,7 @@ if upload_file:
 
         start = df_entry['Start Depth'].astype(int).tolist()
         end = df_entry['End Depth'].astype(int).tolist()
-        hole_size = df_entry['Hole Diameter'].astype(int).tolist()
+        hole_size = df_entry['Hole Diameter'].astype(float).tolist()
 
 
         # Loop through each row
