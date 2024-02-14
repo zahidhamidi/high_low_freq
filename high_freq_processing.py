@@ -657,7 +657,7 @@ if upload_file:
 
 
 
-            # Display the pair plot in Streamlit
-            st.plotly_chart(fig,use_container_width=True)
+                # Display the pair plot in Streamlit
+                st.plotly_chart(fig,use_container_width=True)
 
 
