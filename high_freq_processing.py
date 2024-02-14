@@ -121,17 +121,16 @@ if upload_file:
     st.subheader("Run Summary Info Declaration",divider=True)
 
     # Creating input tables for depth, diameter, and run number declaration
-    # Using st.cache to cache the function results
-    @st.cache
-    def load_data():
-        # Loading or initializing data, if needed
+    # Function to initialize session state and load data if needed
+    def init_session_state():
         if "mdf" not in st.session_state:
             st.session_state.mdf = pd.DataFrame()
     
-        return st.session_state.mdf
+    # Initialize session state and load data
+    init_session_state()
     
-    # Accessing the data using the cached function
-    mdf = load_data()
+    # Access the data using session state directly
+    mdf = st.session_state.mdf
 
     col1, col2, col3, col4 = st.columns(4)
     startdepth = col1.text_input('Start Depth')
