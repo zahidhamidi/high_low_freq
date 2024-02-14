@@ -176,6 +176,7 @@ if upload_file:
         start = df_entry['Start Depth'].astype(int).tolist()
         end = df_entry['End Depth'].astype(int).tolist()
         hole_size = df_entry['Hole Diameter'].astype(float).tolist()
+        hole_size = df_entry['Hole Diameter'].astype(float).tolist()
 
 
         # Loop through each row
@@ -289,6 +290,7 @@ if upload_file:
 
 
         df_bin.to_csv(r"high_freq_bin.csv", index=False)
+        df_bin.to_csv(r"high_freq_bin.csv", index=False)
 
 
 
@@ -317,6 +319,8 @@ if upload_file:
                     fig, ax = plt.subplots(figsize=(1, 1.5))
                     scatter = ax.scatter(filtered_df['Lower Depth'],filtered_df[column], c=filtered_df[column], cmap='viridis')
 
+                    # Invert the y-axis
+                    ax.invert_yaxis()
                     # Invert the y-axis
                     ax.invert_yaxis()
 
