@@ -173,8 +173,8 @@ if upload_file:
 
         # Convert 'Start Depth' and 'End Depth' columns to numeric type
 
-        start = df_entry['Start Depth'].astype(int).tolist()
-        end = df_entry['End Depth'].astype(int).tolist()
+        start = df_entry['Start Depth'].astype(float).tolist()
+        end = df_entry['End Depth'].astype(float).tolist()
         hole_size = df_entry['Hole Diameter'].astype(float).tolist()
         hole_size = df_entry['Hole Diameter'].astype(float).tolist()
 
