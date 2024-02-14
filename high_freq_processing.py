@@ -163,6 +163,9 @@ if upload_file:
 
     if confirm_button:
 
+        # Clear session state after processing
+        st.experimental_reset()
+
         
 
         st.divider()
