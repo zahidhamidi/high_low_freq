@@ -7,6 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 import plotly.graph_objects as go
 import seaborn as sns
 import statsmodels.api as sm
+import numpy as np
 
 
 # Use the full page instead of a narrow central column
@@ -310,22 +311,27 @@ if upload_file:
         for column in result_df.columns:
             if (column != 'Depth Interval') and (column != 'Hole Size'):
 
-                def plot_trend(column,option1):
-
+                def plot_trend(column, option1):
                     # Calculate Lowess trendline
                     lowess = sm.nonparametric.lowess(filtered_df[column], filtered_df['Lower Depth'], frac=0.3)
 
+                    # Calculate residuals (vertical distances from data points to the trendline)
+                    residuals = filtered_df[column] - np.interp(filtered_df['Lower Depth'], lowess[:, 0], lowess[:, 1])
+
+                    # Set a threshold for identifying outliers (adjust as needed)
+                    outlier_threshold = 2.0  # You can adjust this threshold
+
+                    # Identify outliers
+                    outliers = np.abs(residuals) > outlier_threshold
+
                     # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
                     fig, ax = plt.subplots(figsize=(1, 1.5))
-                    scatter = ax.scatter(filtered_df['Lower Depth'],filtered_df[column], c=filtered_df[column], cmap='viridis')
+                    scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=np.where(outliers, 'red', filtered_df[column]), cmap='viridis')
 
-                    # Invert the y-axis
-                    ax.invert_yaxis()
                     # Invert the y-axis
                     ax.invert_yaxis()
 
                     ax.set_title(f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
-
 
                     if column == "OBROP":
                         column = "OBROP (m/hr)"
@@ -337,25 +343,15 @@ if upload_file:
                         column = "Flowrate (gpm)"
 
                     if option1:
-
-                        if column == "OBROP (m/hr)":
-                            ax.plot(lowess[:, 0], lowess[:, 1], color='red',linewidth=4.0)
-                        elif column == "WOB (klbf)":
-                            ax.plot(lowess[:, 0], lowess[:, 1], color='red',linewidth=4.0)
-                        elif column == "RPM (c/min)":
-                            ax.plot(lowess[:, 0], lowess[:, 1], color='red',linewidth=4.0)
-                        elif column == "Flowrate (gpm)":
-                            ax.plot(lowess[:, 0], lowess[:, 1], color='red',linewidth=4.0)
-                            ax.set_xlabel('Depth Interval (m)')
-                        ax.grid(True)
+                        ax.plot(lowess[:, 0], lowess[:, 1], color='red', linewidth=4.0)
 
                     else:
                         ax.set_ylabel(column)
-
                         if column == "Flowrate (gpm)":
                             ax.set_xlabel('Depth Interval (m)')
-                        ax.grid(True)
-                    st.plotly_chart(fig,use_container_width=True, theme='streamlit')
+
+                    ax.grid(True)
+                    st.plotly_chart(fig, use_container_width=True, theme='streamlit')
 
                 def plot(column):
                     
