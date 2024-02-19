@@ -323,6 +323,7 @@ if upload_file:
                 
                     # Identify outliers
                     outliers = np.abs(residuals) > outlier_threshold
+                    print(outliers)
                 
                     # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
                     fig, ax = plt.subplots(figsize=(1, 1.5))
