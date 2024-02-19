@@ -314,25 +314,25 @@ if upload_file:
                 def plot_trend(column, option1):
                     # Calculate Lowess trendline
                     lowess = sm.nonparametric.lowess(filtered_df[column], filtered_df['Lower Depth'], frac=0.3)
-
+                
                     # Calculate residuals (vertical distances from data points to the trendline)
                     residuals = filtered_df[column] - np.interp(filtered_df['Lower Depth'], lowess[:, 0], lowess[:, 1])
-
+                
                     # Set a threshold for identifying outliers (adjust as needed)
                     outlier_threshold = 2.0  # You can adjust this threshold
-
+                
                     # Identify outliers
                     outliers = np.abs(residuals) > outlier_threshold
-
+                
                     # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
                     fig, ax = plt.subplots(figsize=(1, 1.5))
-                    scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=np.where(outliers, 'red', filtered_df[column]), cmap='viridis')
-
+                    scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c='viridis')
+                
                     # Invert the y-axis
                     ax.invert_yaxis()
-
+                
                     ax.set_title(f'{column} vs. Depth Interval for Hole Size {selected_hole_size}')
-
+                
                     if column == "OBROP":
                         column = "OBROP (m/hr)"
                     elif column == "WOB":
@@ -341,15 +341,18 @@ if upload_file:
                         column = "RPM (c/min)"
                     elif column == "FlowRate":
                         column = "Flowrate (gpm)"
-
+                
                     if option1:
                         ax.plot(lowess[:, 0], lowess[:, 1], color='red', linewidth=4.0)
-
+                
                     else:
                         ax.set_ylabel(column)
                         if column == "Flowrate (gpm)":
                             ax.set_xlabel('Depth Interval (m)')
-
+                
+                    # Update the color of outliers to red
+                    scatter.set_facecolor(np.where(outliers, 'red', plt.cm.viridis(filtered_df[column])))
+                
                     ax.grid(True)
                     st.plotly_chart(fig, use_container_width=True, theme='streamlit')
 
