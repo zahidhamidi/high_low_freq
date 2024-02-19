@@ -350,8 +350,10 @@ if upload_file:
                         if column == "Flowrate (gpm)":
                             ax.set_xlabel('Depth Interval (m)')
 
-                    # Update the color of outliers to red
-                    scatter.set_facecolor(np.where(outliers, 'red', plt.cm.viridis(filtered_df[column])))
+                    # Create an array of face colors, using red for outliers
+                    face_colors = np.where(outliers, 'red', plt.cm.viridis(filtered_df[column]))
+                
+                    scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=face_colors)
 
                     ax.grid(True)
                     st.plotly_chart(fig, use_container_width=True, theme='streamlit')
