@@ -28,110 +28,111 @@ if upload_file:
     # Read the CSV file into a Pandas DataFrame
     df = pd.read_csv(upload_file)
     first_original_rows = len(df)
+
+    col111, col222 = st.columns(2)
+
+    with col111:        
         
+        st.subheader("Data Audit : Completeness Check",divider=True)
+        st.write("Checking the existance of vital parameters within high frequency dataset")
+
+        # Check data completeness
+        header_list = df.columns
+
+        # Creating two columns in Streamlit
+        col1, col2 = st.columns(2)
+
+
+
+        # Initialize the checklist_data with False for each column
+        checklist_data = [False] * len(header_list)
+        null_counts = [0] * len(header_list)  # Initialize a list to store null counts
+
+        point = 0
+
+        # Iterate through the headers
+        for i, header in enumerate(header_list):
+            header_lower = header.lower()
+
+            if header_lower in ["hole depth", "depth"]:
+                checklist_data[i] = True
+                point += 1
+
+            elif header_lower == "bit depth":
+                checklist_data[i] = True
+                point += 1
+
+            elif header_lower in ["rotary rpm", "rpm"]:
+                checklist_data[i] = True
+                point += 1
+
+            elif header_lower in ["weight on bit", "wob"]:
+                checklist_data[i] = True
+                point += 1
+
+            elif header_lower in ["rate of penetration", "rop"]:
+                checklist_data[i] = True
+                point += 1
+
+            elif header_lower in ["total pump output", "pump"]:
+                checklist_data[i] = True
+                point += 1
+
+            elif header_lower == "hh:mm:ss":
+                checklist_data[i] = True
+                point += 1
+
+            # Count non-null values in the respective column
+            null_counts[i] = len(df) - df[header].count()
+
+        # Filter the headers and checklist_data to show only where the checkbox is True
+        filtered_data = [(header, exists, null_count) for header, exists, null_count in zip(header_list, checklist_data, null_counts)]
+
+        # Create a DataFrame for the existing data with existence values (1 for True, 0 for False)
+        df_new = pd.DataFrame({
+            "Headers": [header for header, exists, _ in filtered_data],
+            "Existence": [1 if exists else 0 for _, exists, _ in filtered_data],
+            "Null rows count": [null_count for _, _, null_count in filtered_data]
+        })
+
+        # Plot a bar graph
+        fig = px.bar(df_new, x='Headers', y='Existence',
+                    title='Existence of Parameters with Null Rows Count',
+                    color_discrete_sequence=['blue'])  # Adjust color as needed
+
+        # Update layout for better readability
+        fig.update_layout(
+            xaxis_title='Parameters within Dataset Columns',
+            yaxis_title='Match Score',
+        )
+
+        # Display the Plotly bar chart in the Streamlit app
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Display the total number of existing columns
+        st.write(f"Total rows count : {len(df)-1}")
+        st.write(f"{point} out of 7 main data columns exist.")
+
+
+    with col222:
+
+
+        st.subheader("Declare Run Summary Info",divider=True)
+        st.write("Enter Run Summary Details for Depth Interval Splicing Precision")
+
+
+        df_test = pd.DataFrame(columns=["Start Depth","End Depth", "Hole Diameter", "Run Number"])
+        df_entry = st.data_editor(df_test,num_rows="dynamic",key="data_editor")
+
+        if 'clicked' not in st.session_state:
+            st.session_state.clicked = False
         
-    st.subheader("Data Audit : Completeness Check",divider=True)
+        def click_button():
+            st.session_state.clicked = True
 
-    # Check data completeness
-    header_list = df.columns
+        st.button("Confirm Entry",on_click=click_button)
 
-    # Creating two columns in Streamlit
-    col1, col2 = st.columns(2)
-
-
-    st.write("Checking data completeness...\n")
-    st.write(f"Total rows count : {len(df)-1}")
-
-
-    # Initialize the checklist_data with False for each column
-    checklist_data = [False] * len(header_list)
-    null_counts = [0] * len(header_list)  # Initialize a list to store null counts
-
-    point = 0
-
-    # Iterate through the headers
-    for i, header in enumerate(header_list):
-        header_lower = header.lower()
-
-        if header_lower in ["hole depth", "depth"]:
-            checklist_data[i] = True
-            point += 1
-
-        elif header_lower == "bit depth":
-            checklist_data[i] = True
-            point += 1
-
-        elif header_lower in ["rotary rpm", "rpm"]:
-            checklist_data[i] = True
-            point += 1
-
-        elif header_lower in ["weight on bit", "wob"]:
-            checklist_data[i] = True
-            point += 1
-
-        elif header_lower in ["rate of penetration", "rop"]:
-            checklist_data[i] = True
-            point += 1
-
-        elif header_lower in ["total pump output", "pump"]:
-            checklist_data[i] = True
-            point += 1
-
-        elif header_lower == "hh:mm:ss":
-            checklist_data[i] = True
-            point += 1
-
-        # Count non-null values in the respective column
-        null_counts[i] = len(df) - df[header].count()
-
-    # Filter the headers and checklist_data to show only where the checkbox is True
-    filtered_data = [(header, exists, null_count) for header, exists, null_count in zip(header_list, checklist_data, null_counts)]
-
-    # Create a DataFrame for the existing data
-    df_new = pd.DataFrame({
-        "Headers": [header for header, _, _ in filtered_data],
-        "Exists": [exists for _, exists, _ in filtered_data],
-        "Null rows count": [null_count for _, _, null_count in filtered_data]
-    })
-
-
-    # Create a bar chart using Plotly Express
-    fig = px.bar(df_new, x="Headers", y="Exists", text="Null rows count",
-                hover_data=["Headers", "Null rows count"],
-                labels={"Exists": "Existence Points"},
-                color_discrete_sequence=['blue'])  # Adjust color as needed
-
-    # Update layout for better readability
-    fig.update_layout(
-        title='Header Existence and Null Counts',
-        xaxis_title='Headers',
-        yaxis_title='Existence Points',
-    )
-
-    # Display the Plotly bar chart in the Streamlit app
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Display the total number of existing columns
-    st.write(f"{point} out of 7 main data columns exist.")
-
-
-
-
-    st.divider()
-
-    st.subheader("Run Summary Info Declaration",divider=True)
-
-
-    df_test = pd.DataFrame(columns=["Start Depth","End Depth", "Hole Diameter", "Run Number"])
-    df_entry = st.data_editor(df_test,num_rows="dynamic",key="data_editor")
-
-    if 'clicked' not in st.session_state:
-        st.session_state.clicked = False
-    
-    def click_button():
-        st.session_state.clicked = True
-
-    st.button("Confirm Entry",on_click=click_button)
 
     if st.session_state.clicked:
     
@@ -311,10 +312,13 @@ if upload_file:
         for column in result_df.columns:
             if (column != 'Depth Interval') and (column != 'Hole Size'):
 
+
                 def plot_trend(column, option1):
                     # Calculate Lowess trendline
                     lowess = sm.nonparametric.lowess(filtered_df[column], filtered_df['Lower Depth'], frac=0.3)
                 
+<<<<<<< HEAD
+=======
                     # Calculate residuals (vertical distances from data points to the trendline)
                     residuals = filtered_df[column] - np.interp(filtered_df['Lower Depth'], lowess[:, 0], lowess[:, 1])
                 
@@ -325,10 +329,16 @@ if upload_file:
                     outliers = np.abs(residuals) > outlier_threshold
                     print(outliers)
                 
+>>>>>>> ee890af5944fbc6f0c82c297d0fa369b2e2f6d92
                     # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
                     fig, ax = plt.subplots(figsize=(1, 1.5))
                     scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=filtered_df[column],cmap='viridis')
 
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> ee890af5944fbc6f0c82c297d0fa369b2e2f6d92
                     # Invert the y-axis
                     ax.invert_yaxis()
                 
@@ -345,19 +355,24 @@ if upload_file:
                 
                     if option1:
                         ax.plot(lowess[:, 0], lowess[:, 1], color='red', linewidth=4.0)
-                
+
                     else:
                         ax.set_ylabel(column)
                         if column == "Flowrate (gpm)":
                             ax.set_xlabel('Depth Interval (m)')
 
+<<<<<<< HEAD
+=======
                     # # Create an array of face colors, using red for outliers
                     # face_colors = np.where(outliers, 'red', plt.cm.viridis(filtered_df[column]))
                 
                     # scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=face_colors)
 
+>>>>>>> ee890af5944fbc6f0c82c297d0fa369b2e2f6d92
                     ax.grid(True)
                     st.plotly_chart(fig, use_container_width=True, theme='streamlit')
+
+                    
 
                 def plot(column):
                     
@@ -537,9 +552,10 @@ if upload_file:
                     with col4:
                         # st.subheader("OBROP")
                         plot(column)
-            
+        st.write("Note : Actual Plots in DrillPlan will be half of the post-processed low frequency data")
         st.divider()
         st.subheader("Operation Parameter Trendline",divider=True)
+        st.write("Trendline is mathematically built using LOWESS - Locally Weighted Polynomial Regression fitting scatterplots well based on the local-weights of data points along the trendline")
 
         option1 = st.checkbox("Trend Line")
         columns = ['OBROP', 'WOB', 'RPM', 'FlowRate']
@@ -554,12 +570,14 @@ if upload_file:
         st.divider()
 
         st.subheader("Operation Parameter CrossPlots",divider=True)
+        st.write("Variation of 1:1 parameter plots for correlation understanding")
         checkbox = st.selectbox("Select Plots",("All Parameter Plot","OBROP vs. RPM","OBROP vs. WOB","OBROP vs. FlowRate","RPM vs. FlowRate","FlowRate vs. WOB","Cross Plot RPM vs. WOB"))  
 
         col1, col2= st.columns(2)
 
         with col1:
             plot_all(checkbox)
+            
 
                 
         filtered_df['Lower Depth'] = lower
@@ -591,6 +609,7 @@ if upload_file:
 
         st.divider()
         st.subheader('Drilling Parameters Correlation Matrix',divider=True)
+        st.write("Quantitative Review of Parameter Correlation and Relationships")
 
         col4, col5 = st.columns(2)
 
