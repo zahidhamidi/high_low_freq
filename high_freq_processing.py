@@ -326,7 +326,7 @@ if upload_file:
                 
                     # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
                     fig, ax = plt.subplots(figsize=(1, 1.5))
-                    scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c='red',cmap='viridis')
+                    scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=filtered_df[column]map='viridis')
 
                     # Invert the y-axis
                     ax.invert_yaxis()
