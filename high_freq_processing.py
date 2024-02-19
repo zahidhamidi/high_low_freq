@@ -317,28 +317,12 @@ if upload_file:
                     # Calculate Lowess trendline
                     lowess = sm.nonparametric.lowess(filtered_df[column], filtered_df['Lower Depth'], frac=0.3)
                 
-<<<<<<< HEAD
-=======
-                    # Calculate residuals (vertical distances from data points to the trendline)
-                    residuals = filtered_df[column] - np.interp(filtered_df['Lower Depth'], lowess[:, 0], lowess[:, 1])
-                
-                    # Set a threshold for identifying outliers (adjust as needed)
-                    outlier_threshold = 2.0  # You can adjust this threshold
-                
-                    # Identify outliers
-                    outliers = np.abs(residuals) > outlier_threshold
-                    print(outliers)
-                
->>>>>>> ee890af5944fbc6f0c82c297d0fa369b2e2f6d92
                     # Create a scatter plot with x as the column values and y as the lower limit of Depth Interval
                     fig, ax = plt.subplots(figsize=(1, 1.5))
                     scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=filtered_df[column],cmap='viridis')
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> ee890af5944fbc6f0c82c297d0fa369b2e2f6d92
                     # Invert the y-axis
                     ax.invert_yaxis()
                 
@@ -361,14 +345,6 @@ if upload_file:
                         if column == "Flowrate (gpm)":
                             ax.set_xlabel('Depth Interval (m)')
 
-<<<<<<< HEAD
-=======
-                    # # Create an array of face colors, using red for outliers
-                    # face_colors = np.where(outliers, 'red', plt.cm.viridis(filtered_df[column]))
-                
-                    # scatter = ax.scatter(filtered_df['Lower Depth'], filtered_df[column], c=face_colors)
-
->>>>>>> ee890af5944fbc6f0c82c297d0fa369b2e2f6d92
                     ax.grid(True)
                     st.plotly_chart(fig, use_container_width=True, theme='streamlit')
 
